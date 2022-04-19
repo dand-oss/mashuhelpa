@@ -5,3 +5,7 @@ mashumaro
 mixin
 monkeypatch
 msgpack
+decl
+py
+serializer
+deserialize
