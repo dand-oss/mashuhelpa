@@ -29,7 +29,7 @@ member_list:
 
     print(f"--- from YAML to dataclass{yaml_str}")
 
-    # de-serialize
+    # deserialize
     main_inst = mh.from_yaml(MainClass, yaml_str)
     pprint(main_inst)
 

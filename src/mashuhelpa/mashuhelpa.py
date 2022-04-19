@@ -1,5 +1,4 @@
 """Allow use of Mashumaro without inheriting from base classes."""
-import dataclasses
 import json
 from functools import partial
 from types import MappingProxyType
@@ -25,38 +24,36 @@ json_DEFAULT_DICT_PARAMS = {
     "use_enum": False,
     "use_datetime": False,
 }
-json_EncodedData = Union[str, bytes, bytearray]
-json_Encoder = Callable[[Dict], json_EncodedData]
-json_Decoder = Callable[[json_EncodedData], Dict]
-json_T = TypeVar("T", bound=DataClassJSONMixin)
+json_encoded_data = Union[str, bytes, bytearray]
+json_encoder = Callable[[Dict], json_encoded_data]
+json_decoder = Callable[[json_encoded_data], Dict]
 
 yaml_DEFAULT_DICT_PARAMS = {
     "use_bytes": False,
     "use_enum": False,
     "use_datetime": False,
 }
-yaml_EncodedData = Union[str, bytes]
-yaml_Encoder = Callable[[Dict], yaml_EncodedData]
-yaml_Decoder = Callable[[yaml_EncodedData], Dict]
-yaml_T = TypeVar("T", bound=DataClassYAMLMixin)
+yaml_encoded_data = Union[str, bytes]
+yaml_encoder = Callable[[Dict], yaml_encoded_data]
+yaml_decoder = Callable[[yaml_encoded_data], Dict]
 
 msgpack_DEFAULT_DICT_PARAMS = {
     "use_bytes": True,
     "use_enum": False,
     "use_datetime": False,
 }
-msgpack_EncodedData = Union[str, bytes, bytearray]
-msgpack_Encoder = Callable[[Dict], msgpack_EncodedData]
-msgpack_Decoder = Callable[[msgpack_EncodedData], Dict]
-msgpack_T = TypeVar("T", bound=DataClassMessagePackMixin)
+msgpack_encoded_data = Union[str, bytes, bytearray]
+msgpack_encoder = Callable[[Dict], msgpack_encoded_data]
+msgpack_decoder = Callable[[msgpack_encoded_data], Dict]
 
 
 def build_mashumaro(cls: TypeVar) -> bool:
     """Add mashumaro CodeBuilder to class."""
+    ret_code = True
     try:
         # don't build it twice...
         # support inherit class
-        return getattr(cls, f"__is_mashu_built_{cls.__name__}__")
+        ret_code = getattr(cls, f"__is_mashu_built_{cls.__name__}__")
 
     except AttributeError:
 
@@ -66,16 +63,15 @@ def build_mashumaro(cls: TypeVar) -> bool:
 
         # done
         setattr(cls, f"__is_mashu_built_{cls.__name__}__", True)
-
-    return True
+    return ret_code
 
 
 def to_json(
-    inst: json_T,
-    encoder: Optional[json_Encoder] = json.dumps,
+    inst: DataClassJSONMixin,
+    encoder: Optional[json_encoder] = json.dumps,
     dict_params: Optional[Mapping] = MappingProxyType({}),
     **encoder_kwargs: Any,
-) -> json_EncodedData:
+) -> json_encoded_data:
     """Convert to JSON."""
     return encoder(
         inst.to_dict(**dict(json_DEFAULT_DICT_PARAMS, **dict_params)),
@@ -84,25 +80,25 @@ def to_json(
 
 
 def from_json(
-    cls: Type[json_T],
-    data: json_EncodedData,
-    decoder: Optional[json_Decoder] = json.loads,
+    cls: Type[DataClassJSONMixin],
+    en_data: json_encoded_data,
+    decoder: Optional[json_decoder] = json.loads,
     dict_params: Optional[Mapping] = MappingProxyType({}),
     **decoder_kwargs,
-) -> json_T:
+) -> DataClassJSONMixin:
     """Convert from JSON."""
     return cls.from_dict(
-        decoder(data, **decoder_kwargs),
+        decoder(en_data, **decoder_kwargs),
         **dict(json_DEFAULT_DICT_PARAMS, **dict_params),
     )
 
 
 def to_yaml(
-    inst: yaml_T,
-    encoder: Optional[yaml_Encoder] = yaml.dump,
+    inst: DataClassYAMLMixin,
+    encoder: Optional[yaml_encoder] = yaml.dump,
     dict_params: Optional[Mapping] = MappingProxyType({}),
     **encoder_kwargs,
-) -> yaml_EncodedData:
+) -> yaml_encoded_data:
     """Convert to YAML."""
     return encoder(
         inst.to_dict(**dict(yaml_DEFAULT_DICT_PARAMS, **dict_params)),
@@ -111,27 +107,27 @@ def to_yaml(
 
 
 def from_yaml(
-    cls: Type[yaml_T],
-    data: yaml_EncodedData,
-    decoder: Optional[yaml_Decoder] = yaml.safe_load,
+    cls: Type[DataClassYAMLMixin],
+    en_data: yaml_encoded_data,
+    decoder: Optional[yaml_decoder] = yaml.safe_load,
     dict_params: Optional[Mapping] = MappingProxyType({}),
     **decoder_kwargs,
-) -> yaml_T:
+) -> DataClassYAMLMixin:
     """Convert from YAML."""
     return cls.from_dict(
-        decoder(data, **decoder_kwargs),
+        decoder(en_data, **decoder_kwargs),
         **dict(yaml_DEFAULT_DICT_PARAMS, **dict_params),
     )
 
 
 def to_msgpack(
-    inst: msgpack_T,
-    encoder: Optional[msgpack_Encoder] = partial(
+    inst: DataClassMessagePackMixin,
+    encoder: Optional[msgpack_encoder] = partial(
         msgpack.packb, use_bin_type=True
     ),
     dict_params: Optional[Mapping] = MappingProxyType({}),
     **encoder_kwargs,
-) -> msgpack_EncodedData:
+) -> msgpack_encoded_data:
     """Convert to msgpack."""
     return encoder(
         inst.to_dict(**dict(msgpack_DEFAULT_DICT_PARAMS, **dict_params)),
@@ -140,14 +136,14 @@ def to_msgpack(
 
 
 def from_msgpack(
-    cls: Type[msgpack_T],
-    data: msgpack_EncodedData,
-    decoder: Optional[msgpack_Decoder] = partial(msgpack.unpackb, raw=False),
+    cls: Type[DataClassMessagePackMixin],
+    en_data: msgpack_encoded_data,
+    decoder: Optional[msgpack_decoder] = partial(msgpack.unpackb, raw=False),
     dict_params: Optional[Mapping] = MappingProxyType({}),
     **decoder_kwargs,
-) -> msgpack_T:
+) -> DataClassMessagePackMixin:
     """Convert from msgpack."""
     return cls.from_dict(
-        decoder(data, **decoder_kwargs),
+        decoder(en_data, **decoder_kwargs),
         **dict(msgpack_DEFAULT_DICT_PARAMS, **dict_params),
     )

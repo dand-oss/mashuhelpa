@@ -1,7 +1,7 @@
 """
 tests/test-fwd-decl.py
 
-No inhertance
+No inheritance
 forward declare classes
 """
 from dataclasses import dataclass
