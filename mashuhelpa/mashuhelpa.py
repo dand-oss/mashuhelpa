@@ -13,10 +13,11 @@ from typing import Union
 
 import msgpack
 import yaml
-from mashumaro import DataClassJSONMixin
-from mashumaro import DataClassMessagePackMixin
-from mashumaro import DataClassYAMLMixin
-from mashumaro.serializer.base.metaprogramming import CodeBuilder
+from mashumaro.core.meta.code.builder import CodeBuilder
+from mashumaro.mixins.json import DataClassJSONMixin
+from mashumaro.mixins.msgpack import DataClassMessagePackMixin
+from mashumaro.mixins.toml import DataClassTOMLMixin
+from mashumaro.mixins.yaml import DataClassYAMLMixin
 
 
 json_DEFAULT_DICT_PARAMS = {
