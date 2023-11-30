@@ -10,15 +10,15 @@ import sys
 import typing
 from pprint import pprint
 
-import mashuhelpa as mh
 from dc_examples import MainClass
+
+import mashuhelpa as mh
 
 # serialize helper
 # example dataclasses
 
 
 def test_yaml() -> None:
-
     yaml_str = """
 a: 11
 member_list:
@@ -39,7 +39,6 @@ member_list:
 
 
 def test_json() -> None:
-
     json_str = """
 {
     "a": 11,
